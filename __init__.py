@@ -1,10 +1,12 @@
 # Author: IFCZT
 # Email: ifczt@qq.com
+import atexit
+
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from db import DBManager
+from .db import DBManager
 
 
 class IFastAPI:
@@ -17,6 +19,7 @@ class IFastAPI:
         self.config = config
         self.app = FastAPI()
         self.setup()
+        atexit.register(self.shutdown)
 
     def setup(self):
         self.setup_config()
@@ -38,6 +41,11 @@ class IFastAPI:
         _db = DBManager()
         _db.setup(self.config)
         _db.base.metadata.create_all(bind=_db.engine)
+
+    def shutdown(self):
+        """关闭数据库连接"""
+        print("关闭数据库连接")
+        DBManager().shutdown()
 
     def run(self):
         uvicorn.run(**self.config.SERVER_CONFIG)
