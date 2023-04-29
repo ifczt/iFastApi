@@ -63,6 +63,10 @@ class DBManager:
             self._local.session = scoped_session(self._session_factory, scopefunc=lambda: id(self._local))
         return self._local.session()
 
+    @property
+    def session(self):
+        return self.get_session()
+
     def close_session(self):
         """
         关闭当前线程的会话对象
@@ -71,6 +75,7 @@ class DBManager:
             self._local.session.commit()
             self._local.session.close()
             self._local.session.remove()
+            del self._local.session
 
     async def shutdown(self):
         self.close_session()
@@ -82,7 +87,6 @@ class BaseDB(DBManager.base):
 
     create_time = Column(Integer, comment='生成时间')
     status = Column(SmallInteger, default=1, comment='是否软删除 0 / 1')
-    DB = DBManager()
 
     def __init__(self, *args, **kwargs):
         self.set_attrs(kwargs)
@@ -93,11 +97,21 @@ class BaseDB(DBManager.base):
             if hasattr(self, key) and key != 'id':
                 setattr(self, key, value)
 
+    @classmethod
+    @property
+    def db(cls):
+        return DBManager().session
+
+    @classmethod
+    @property
+    def query(cls):
+        return cls.db.query(cls)
+
     def dict(self):
         return {c.name: getattr(self, c.name, None) for c in self.__table__.columns}
 
     @classmethod
     def get_id(cls, ident):
-        result = cls.DB.get_session().query(cls).get(ident)
+        result = cls.query.get(ident)
         result = result.dict() if result else None
         return result

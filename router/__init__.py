@@ -1,5 +1,16 @@
 # Author: IFCZT
 # Email: ifczt@qq.com
+from fastapi import APIRouter
+
+
+class Router:
+
+    def __init__(self):
+        self.name = self.__class__.__name__.lower()
+        self.router = APIRouter(prefix='/' + self.name)
+
+
+
 import logging
 
 from utils.singleton import Singleton

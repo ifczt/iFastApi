@@ -4,7 +4,7 @@ from collections import UserDict
 
 
 class RouteInfo(UserDict):
-    def __init__(self, path, endpoint, methods=None, dependencies=None, summary=None, need_db=True, need_auth=True,
+    def __init__(self, path, endpoint, methods=None, dependencies=None, summary=None, use_db=True, verify_auth=True,
                  need_captcha=True):
         """
         :param path: 访问路径
@@ -12,8 +12,8 @@ class RouteInfo(UserDict):
         :param methods: 请求方法
         :param dependencies: 依赖函数
         :param summary: 描述
-        :param need_db: 是否需要使用数据库
-        :param need_auth: 是否需要验证权限
+        :param use_db: 是否需要使用数据库
+        :param verify_auth: 是否需要验证权限
         """
         super().__init__()
         if methods is None:
@@ -24,7 +24,6 @@ class RouteInfo(UserDict):
             'methods': methods,
             'dependencies': dependencies,
             'summary': summary,
-            'need_db': need_db,
-            'need_auth': need_auth,
-            'need_captcha': need_captcha,
+            'use_db': use_db,
+            'verify_auth': verify_auth,
         }

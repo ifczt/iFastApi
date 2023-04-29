@@ -44,8 +44,10 @@ class IFastAPI:
 
     async def shutdown(self):
         """关闭数据库连接"""
-        print("关闭数据库连接")
         await DBManager().shutdown()
 
     def run(self):
         uvicorn.run(**self.config.SERVER_CONFIG)
+
+
+
