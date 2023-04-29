@@ -3,7 +3,7 @@
 import atexit
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from starlette.middleware.cors import CORSMiddleware
 
 from .db import DBManager
@@ -17,7 +17,7 @@ class IFastAPI:
 
     def __init__(self, config):
         self.config = config
-        self.app = FastAPI()
+        self.app = FastAPI(dependencies=[Depends(DBManager().auto)])
         self.setup()
         atexit.register(self.shutdown)
 
@@ -42,10 +42,10 @@ class IFastAPI:
         _db.setup(self.config)
         _db.base.metadata.create_all(bind=_db.engine)
 
-    def shutdown(self):
+    async def shutdown(self):
         """关闭数据库连接"""
         print("关闭数据库连接")
-        DBManager().shutdown()
+        await DBManager().shutdown()
 
     def run(self):
         uvicorn.run(**self.config.SERVER_CONFIG)

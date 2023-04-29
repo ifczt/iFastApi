@@ -1,7 +1,10 @@
 # Author: IFCZT
 # Email: ifczt@qq.com
-
+import re
 from threading import local
+from urllib.parse import urlparse
+
+from starlette.requests import Request
 
 from sqlalchemy import Column, Integer, SmallInteger
 from sqlalchemy import create_engine
@@ -18,6 +21,7 @@ class DBManager:
     base = declarative_base()
 
     def __init__(self):
+        self._session_factory = None
         self._local = None
         self._engine = None
 
@@ -26,12 +30,27 @@ class DBManager:
             raise Exception('数据库连接地址未配置')
 
         self._engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
+        self._session_factory = sessionmaker(bind=None, autocommit=False, autoflush=False)
+
+    def auto(self, request: Request):
+        """
+        自动生成会话对象 自动生成、关闭会话对象
+        """
+        path = re.sub(r'/', ':', request.url.path.strip('/'))
+        try:
+            yield self.get_session()
+        finally:
+            self.close_session()
 
     @property
     def engine(self):
         if not self._engine:
             raise Exception('数据库未连接')
         return self._engine
+
+    @engine.setter
+    def engine(self, database_uri):
+        self._engine = create_engine(database_uri)
 
     def get_session(self):
         """
@@ -40,8 +59,8 @@ class DBManager:
         if not self._local:
             self._local = local()
         if not hasattr(self._local, "session"):
-            session_factory = sessionmaker(bind=self.engine, autocommit=False, autoflush=False)
-            self._local.session = scoped_session(session_factory, scopefunc=lambda: id(self._local))
+            self._session_factory.configure(bind=self.engine)
+            self._local.session = scoped_session(self._session_factory, scopefunc=lambda: id(self._local))
         return self._local.session()
 
     def close_session(self):
@@ -54,11 +73,7 @@ class DBManager:
             self._local.session.remove()
 
     async def shutdown(self):
-        session = self.get_session()
-        session.commit()
-        session.close()
-        self._local = None
-        print("退出数据库连接")
+        self.close_session()
 
 
 class BaseDB(DBManager.base):
@@ -67,6 +82,7 @@ class BaseDB(DBManager.base):
 
     create_time = Column(Integer, comment='生成时间')
     status = Column(SmallInteger, default=1, comment='是否软删除 0 / 1')
+    DB = DBManager()
 
     def __init__(self, *args, **kwargs):
         self.set_attrs(kwargs)
@@ -82,6 +98,6 @@ class BaseDB(DBManager.base):
 
     @classmethod
     def get_id(cls, ident):
-        result = DBManager().get_session().query(cls).get(ident)
+        result = cls.DB.get_session().query(cls).get(ident)
         result = result.dict() if result else None
         return result
