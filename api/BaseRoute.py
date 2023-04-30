@@ -18,7 +18,6 @@ class BaseRoute:
             RouteInfo('/get_list', self.get_list, summary='获取列表', verify_auth=True),
             RouteInfo('/get_info', self.get_info, summary='获取详情', verify_auth=True),
         )
-        self.setup()
 
     @property
     def db(self):
@@ -47,6 +46,19 @@ class BaseRoute:
 
     def get_info(self, data: QueryModel):
         return self.db.get_info(**data.dict())
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if cls != BaseRoute:
+            delattr(cls, "init_router")
+
+    @classmethod
+    def init_router(cls):
+        if BaseRoute.__is_initialized:
+            return 'BaseRoute已经初始化过了'
+        BaseRoute.__is_initialized = True
+        for item in BaseRoute.__subclasses__():
+            item().setup()
 
     def setup_routes(self):
         raise NotImplementedError()
