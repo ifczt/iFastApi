@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
+from ..utils import path_to_key
 from .BaseQuery import BaseQuery
 from ..utils.singleton import Singleton
 from ..utils.time import time as t
@@ -36,7 +37,8 @@ class DBManager:
         """
         自动生成会话对象 自动生成、关闭会话对象
         """
-        path = re.sub(r'/', ':', request.url.path.strip('/'))
+
+        path = path_to_key(request.url.path)
         try:
             yield self.get_session()
         finally:
