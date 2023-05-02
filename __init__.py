@@ -15,12 +15,10 @@ class IFastAPI:
     config: 配置文件
         - ORIGINS: 允许跨域的域名 默认为'*'
     """
+    app = FastAPI(dependencies=[Depends(DBManager().auto)])
 
-    def __init__(self, config):
-        self.config = config
-        self.app = FastAPI(dependencies=[Depends(DBManager().auto)])
-        self.setup()
-        atexit.register(self.shutdown)
+    def __init__(self):
+        self.config = None
 
     def setup(self):
         self.setup_config()
@@ -48,9 +46,6 @@ class IFastAPI:
         """配置路由"""
         BaseRoute.init_router(self.app)
 
-    async def shutdown(self):
-        """关闭数据库连接"""
-        await DBManager().shutdown()
-
-    def run(self):
-        uvicorn.run(**self.config.SERVER_CONFIG)
+    def run(self, config):
+        self.config = config
+        self.setup()

@@ -13,17 +13,17 @@ class BaseRoute:
 
     def __init__(self, prefix=None):
         self._db = None
-        self.name = self.__class__.__name__.lower()
-        self.router = APIRouter(prefix='/' + (prefix or self.name))
-        self.default_routes = (
+        _name = f'/{prefix or self.__class__.__name__.lower()}'
+        self.router = APIRouter(prefix=_name)
+        self.default_routes = [
             RouteInfo('/remove', self.remove, summary='软删除', verify_auth=True),
             RouteInfo('/delete', self.delete, summary='硬删除', verify_auth=True),
             RouteInfo('/update', self.update, summary='更新', verify_auth=True),
             RouteInfo('/get_list', self.get_list, summary='获取列表', verify_auth=True),
-            RouteInfo('/get_info', self.get_info, summary='获取详情', verify_auth=True),
-        )
+            RouteInfo('/get_info', self.get_info, summary='获取详情', verify_auth=True)
+        ]
         self.roure_manager = RouteManager()
-        self.routers = ()
+        self.routers = []
 
     @property
     def db(self):
@@ -50,12 +50,6 @@ class BaseRoute:
     def get_info(self, data: QueryModel):
         return self.db.get_info(**data.dict())
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        if cls != BaseRoute:
-            if getattr(cls, "init_router", None) is not None:
-                delattr(cls, "init_router")
-
     @classmethod
     def init_router(cls, app):
         if BaseRoute.__is_initialized:
@@ -77,6 +71,6 @@ class BaseRoute:
             # 使用字典推导式和 filter 函数获取目标函数的参数信息
             func_params = inspect.signature(self.router.add_api_route).parameters
             kwargs = {k: v for k, v in route_info.items() if k in filter(lambda x: x in route_info, func_params)}
-
             self.router.add_api_route(**kwargs)
+
         app.include_router(self.router)
