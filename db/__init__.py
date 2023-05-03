@@ -153,6 +153,7 @@ class BaseDB(DBManager.base):
     @classmethod
     def get_id(cls, ident, result_dict=None):
         result = cls.query.get(ident)
+        result.fileds = result_dict or result.fileds
         return dict(result or {})
 
     @classmethod
