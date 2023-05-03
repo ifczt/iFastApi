@@ -1,5 +1,7 @@
 from starlette.responses import JSONResponse as _JSONResponse
 
+from ..db import BaseDB
+
 
 class HTTPStatus:
     OK = 200  # 请求成功
@@ -22,6 +24,8 @@ class HTTPStatus:
 class JSONResponse(_JSONResponse):
     def __init__(self, content=None, status_code=HTTPStatus.OK, headers=None, media_type=None, background=None):
         content = dict(filter(lambda item: item[1] is not None and item[1] != '', content.items()))
+        if isinstance(content.get('data', None), BaseDB):
+            content['data'] = dict(content['data'])
         super().__init__(content=content, status_code=status_code, headers=headers, media_type=media_type, background=background)
 
 

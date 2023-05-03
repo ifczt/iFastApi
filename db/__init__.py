@@ -89,15 +89,44 @@ class BaseDB(DBManager.base):
 
     create_time = Column(Integer, comment='生成时间')
     status = Column(SmallInteger, default=1, comment='是否软删除 0 / 1')
+    fileds = []
 
     def __init__(self, *args, **kwargs):
         self.set_attrs(kwargs)
         self.create_time = t.int_time(modes="ms")
 
+    '''输出dict 相关方法'''
+
+    def __getitem__(self, item):
+        return getattr(self, item)
+
     def set_attrs(self, attrs_dict):
         for key, value in attrs_dict.items():
             if hasattr(self, key) and key != 'id':
                 setattr(self, key, value)
+
+    def keys(self):
+        return self.fileds
+
+    def hide(self, *keys):
+        for key in keys:
+            self.fileds.remove(key)
+        return self
+
+    def append(self, *keys):
+        for key in keys:
+            self.fileds.append(key)
+        return self
+
+    '''输出dict 相关方法'''
+
+    @property
+    def create_datetime(self):
+        # 将时间戳转换为时间
+        if self.create_time:
+            return t.format_time(self.create_time)
+        else:
+            return None
 
     @classmethod
     @property
@@ -113,7 +142,8 @@ class BaseDB(DBManager.base):
         return {c.name: getattr(self, c.name, None) for c in self.__table__.columns}
 
     @classmethod
-    def get_id(cls, ident):
+    def get_id(cls, ident, result_dict=None):
         result = cls.query.get(ident)
-        result = result.dict() if result else None
+        print(dict(result))
+        # result = result.dict() if result else None
         return result
