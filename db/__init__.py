@@ -2,11 +2,10 @@
 # Email: ifczt@qq.com
 import re
 from threading import local
-from urllib.parse import urlparse
 
 from starlette.requests import Request
 
-from sqlalchemy import Column, Integer, SmallInteger
+from sqlalchemy import Column, Integer, SmallInteger, text, and_
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -53,6 +52,16 @@ class DBManager:
     @engine.setter
     def engine(self, database_uri):
         self._engine = create_engine(database_uri)
+
+    def execute(self, sql, execute_type='read'):
+        """执行sql语句"""
+        with self.engine.connect() as conn:
+            result = conn.execute(text(sql))
+            if execute_type == 'read':
+                return result
+            elif execute_type == 'write':
+                conn.commit()
+                return result.lastrowid
 
     def get_session(self):
         """
@@ -144,6 +153,58 @@ class BaseDB(DBManager.base):
     @classmethod
     def get_id(cls, ident, result_dict=None):
         result = cls.query.get(ident)
-        print(dict(result))
-        # result = result.dict() if result else None
-        return result
+        return dict(result or {})
+
+    @classmethod
+    def get_list(cls, limit=1, size=20, query_dict=None, order_by=None):
+        """
+        获取列表
+        :param limit: 页码
+        :param size: 每页数量
+        :param query_dict: 查询条件
+        :param order_by: 排序 id^ = id desc id = id asc
+        """
+        condition = cls.build_query_condition(query_dict)
+        sql = cls.query.filter(condition)
+        if order_by:
+            order_by = re.sub(r'(\w+)\^', r'\1 desc', order_by)
+            sql = sql.order_by(text(order_by))
+        result = sql.limit(size).offset((limit - 1) * size).all()
+        return [dict(row) for row in result]
+
+    @classmethod
+    def build_query_condition(cls, query_dict=None):
+        condition = and_(cls.status == 1)
+
+        for key, value in query_dict.items():
+
+            if key.startswith('eq:'):
+                condition = and_(condition, getattr(cls, key[3:]) == value)
+            elif key.startswith('ne:'):
+                condition = and_(condition, getattr(cls, key[3:]) != value)
+            elif key.startswith('gt:'):
+                condition = and_(condition, getattr(cls, key[3:]) > value)
+            elif key.startswith('ge:'):
+                condition = and_(condition, getattr(cls, key[3:]) >= value)
+            elif key.startswith('lt:'):
+                condition = and_(condition, getattr(cls, key[3:]) < value)
+            elif key.startswith('le:'):
+                condition = and_(condition, getattr(cls, key[3:]) <= value)
+            elif key.startswith('in:'):
+                condition = and_(condition, getattr(cls, key[3:]).in_(value))
+            elif key.startswith('like:'):
+                condition = and_(condition, getattr(cls, key[5:]).like(value))
+            elif key.startswith('ilike:'):
+                condition = and_(condition, getattr(cls, key[6:]).ilike(value))
+            elif key.startswith('is:'):
+                condition = and_(condition, getattr(cls, key[3:]) == value)
+            elif key.startswith('isnot:'):
+                condition = and_(condition, getattr(cls, key[6:]) != value)
+            elif key.startswith('isnull:'):
+                condition = and_(condition, getattr(cls, key[6:]) is None)
+            elif key.startswith('isnotnull:'):
+                condition = and_(condition, getattr(cls, key[9:]) is not None)
+            elif key.startswith('between:'):
+                condition = and_(condition, getattr(cls, key[8:]).between(value[0], value[1]))
+
+        return condition
