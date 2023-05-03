@@ -6,7 +6,6 @@ from ..utils.singleton import Singleton
 @Singleton
 class RouteManager:
     def __init__(self):
-        self.logger = logging.getLogger('RouteManager')
         # 无需使用DB的路由集合
         self.use_db_route = set()
         self.auth = {}

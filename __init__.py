@@ -1,13 +1,18 @@
 # Author: IFCZT
 # Email: ifczt@qq.com
 import atexit
+from urllib.request import Request
 
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import ValidationError, RequestValidationError
 import uvicorn
 from fastapi import FastAPI, Depends
+from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
 from .api.BaseRoute import BaseRoute
 from .db import DBManager
+from .utils.iResponse import HTTPStatus, Error
 
 
 class IFastAPI:
@@ -16,9 +21,7 @@ class IFastAPI:
         - ORIGINS: 允许跨域的域名 默认为'*'
     """
     app = FastAPI(dependencies=[Depends(DBManager().auto)])
-
-    def __init__(self):
-        self.config = None
+    config = None
 
     def setup(self):
         self.setup_config()
@@ -47,5 +50,42 @@ class IFastAPI:
         BaseRoute.init_router(self.app)
 
     def run(self, config):
-        self.config = config
+        self.config = IFastAPI.config = config
         self.setup()
+
+    @staticmethod
+    @app.exception_handler(HTTPException)  # 自定义HttpRequest 请求异常
+    async def http_exception_handle(request, exc):
+        match exc.status_code:
+            case HTTPStatus.METHOD_NOT_ALLOWED:
+                message = '未定义该接口'
+            case HTTPStatus.NOT_FOUND:
+                message = '访问接口不存在'
+            case _:
+                message = exc.detail
+        return Error(message=message, status_code=exc.status_code)
+
+    @staticmethod
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request, exc):
+        return Error(
+            status_code=500,
+            message="服务器内部错误"
+        )
+
+    @staticmethod
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request, exc):
+        D = IFastAPI.config.PARAM_TRANSLATE
+        errors = exc.errors()
+        locs = []
+        for i in errors:
+            if i.get('loc'):
+                locs.extend(list(i.get('loc')))
+        locs = list(set(locs))
+        locs = [D.get(i, i) for i in locs]
+        if 'body' in locs:
+            locs.remove('body')
+
+        message = f"参数[{','.join(locs) if isinstance(locs, list) else locs}]未通过验证" if locs else '未接受到任何有效参数'
+        return Error(message=message, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
