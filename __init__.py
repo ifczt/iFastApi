@@ -10,6 +10,7 @@ from fastapi import FastAPI, Depends
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
+from .utils.globals import g
 from .api.BaseRoute import BaseRoute
 from .db import DBManager
 from .utils.iResponse import HTTPStatus, Error
@@ -51,6 +52,7 @@ class IFastAPI:
 
     def run(self, config):
         self.config = IFastAPI.config = config
+        g.config = config
         self.setup()
 
     @staticmethod

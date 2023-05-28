@@ -9,7 +9,6 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .iResponse import Error, HTTPStatus
 from .globals import g
 
-print(binascii.hexlify(os.urandom(24)))
 SECRET_KEY = "4105177d86fa16a2747212a7101dafda5c4027a4e4f64054"  # 密钥
 ALGORITHM = "HS256"  # 算法
 
@@ -22,7 +21,7 @@ class JWTBearer(HTTPBearer):
     @staticmethod
     def token(data: dict, expires_time=None):
         if expires_time is None:
-            expires_time = g.config.get('ACCESS_TOKEN_EXPIRES')
+            expires_time = g.config.ACCESS_TOKEN_EXPIRES
             if expires_time is None:
                 raise Error(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, message="未设置ACCESS_TOKEN_EXPIRES")
         exp = datetime.utcnow() + expires_time  # expire 令牌到期时间
