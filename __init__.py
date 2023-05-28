@@ -62,7 +62,7 @@ class IFastAPI:
         }
         content.update(exc.data)
         return JSONResponse(
-            status_code=200,
+            status_code=exc.status_code,
             content=content
         )
 
@@ -82,7 +82,7 @@ class IFastAPI:
     @app.exception_handler(Exception)
     async def global_exception_handler(request, exc):
         return JSONResponse(
-            status_code=500,
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             message="服务器内部错误"
         )
 
