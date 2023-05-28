@@ -1,5 +1,6 @@
 # Author: IFCZT
 # Email: ifczt@qq.com
+from urllib.request import Request
 
 from fastapi import FastAPI, Depends
 from fastapi.exceptions import RequestValidationError
@@ -9,7 +10,7 @@ from starlette.middleware.cors import CORSMiddleware
 from .api.BaseRoute import BaseRoute
 from .db import DBManager
 from .utils.globals import g
-from .utils.iResponse import HTTPStatus, Error
+from .utils.iResponse import HTTPStatus, Error, JSONResponse
 
 
 class IFastAPI:
@@ -69,6 +70,20 @@ class IFastAPI:
         return Error(
             status_code=500,
             message="服务器内部错误"
+        )
+
+    @staticmethod
+    @app.exception_handler(Error)
+    async def unicorn_exception_handler(request: Request, exc: Error):
+        content = {
+            "success": False,
+            "status_code": exc.status_code,
+            "message": exc.message,
+        }
+        content.update(exc.data)
+        return JSONResponse(
+            status_code=200,
+            content=content
         )
 
     @staticmethod
