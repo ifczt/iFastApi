@@ -1,8 +1,6 @@
 from fastapi import HTTPException
 from starlette.responses import JSONResponse as _JSONResponse
 
-from ..db import BaseDB
-
 
 class HTTPStatus:
     OK = 200  # 请求成功
@@ -23,7 +21,9 @@ class HTTPStatus:
 
 
 class JSONResponse(_JSONResponse):
+
     def __init__(self, content=None, message=None, status_code=HTTPStatus.OK, headers=None, media_type=None, background=None):
+        from ..db import BaseDB
         if content is None:
             content = {}
         content = dict(filter(lambda item: item[1] is not None and item[1] != '', content.items()))

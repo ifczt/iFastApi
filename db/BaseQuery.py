@@ -5,6 +5,7 @@ from typing import Tuple, Any
 from sqlalchemy import orm
 from ..utils.iResponse import Error, HTTPStatus
 
+
 class BaseQuery(orm.Query):
     def _all_selected_columns(self):
         # 获取当前查询对象中所有被选择的列
