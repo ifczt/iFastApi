@@ -4,7 +4,7 @@ from urllib.request import Request
 
 from fastapi import FastAPI, Depends
 from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException
+from starlette.exceptions import HTTPException as StarletteException
 from starlette.middleware.cors import CORSMiddleware
 
 from .api.BaseRoute import BaseRoute
@@ -53,26 +53,6 @@ class IFastAPI:
         self.setup()
 
     @staticmethod
-    @app.exception_handler(HTTPException)  # 自定义HttpRequest 请求异常
-    async def http_exception_handle(request, exc):
-        match exc.status_code:
-            case HTTPStatus.METHOD_NOT_ALLOWED:
-                message = '未定义该接口'
-            case HTTPStatus.NOT_FOUND:
-                message = '访问接口不存在'
-            case _:
-                message = exc.detail
-        return Error(message=message, status_code=exc.status_code)
-
-    @staticmethod
-    @app.exception_handler(Exception)
-    async def global_exception_handler(request, exc):
-        return Error(
-            status_code=500,
-            message="服务器内部错误"
-        )
-
-    @staticmethod
     @app.exception_handler(Error)
     async def unicorn_exception_handler(request: Request, exc: Error):
         content = {
@@ -84,6 +64,26 @@ class IFastAPI:
         return JSONResponse(
             status_code=200,
             content=content
+        )
+
+    @staticmethod
+    @app.exception_handler(StarletteException)  # 自定义HttpRequest 请求异常
+    async def http_exception_handle(request, exc):
+        match exc.status_code:
+            case HTTPStatus.METHOD_NOT_ALLOWED:
+                message = '未定义该接口'
+            case HTTPStatus.NOT_FOUND:
+                message = '访问接口不存在'
+            case _:
+                message = exc.detail
+        return JSONResponse(message=message, status_code=exc.status_code)
+
+    @staticmethod
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request, exc):
+        return JSONResponse(
+            status_code=500,
+            message="服务器内部错误"
         )
 
     @staticmethod
@@ -101,4 +101,4 @@ class IFastAPI:
             locs.remove('body')
 
         message = f"参数[{','.join(locs) if isinstance(locs, list) else locs}]未通过验证" if locs else '未接受到任何有效参数'
-        return Error(message=message, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
+        return JSONResponse(message=message, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)

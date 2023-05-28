@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from starlette.responses import JSONResponse as _JSONResponse
 
 from ..db import BaseDB
@@ -22,11 +23,25 @@ class HTTPStatus:
 
 
 class JSONResponse(_JSONResponse):
-    def __init__(self, content=None, status_code=HTTPStatus.OK, headers=None, media_type=None, background=None):
+    def __init__(self, content=None, message=None, status_code=HTTPStatus.OK, headers=None, media_type=None, background=None):
+        if content is None:
+            content = {}
         content = dict(filter(lambda item: item[1] is not None and item[1] != '', content.items()))
         if isinstance(content.get('data', None), BaseDB):
             content['data'] = dict(content['data'])
+        if message:
+            content['message'] = message
         super().__init__(content=content, status_code=status_code, headers=headers, media_type=media_type, background=background)
+
+
+class Error(Exception):
+    def __init__(self, status_code: int = HTTPStatus.BAD_REQUEST, message: str = '未知错误', data=None):
+        if data is None:
+            data = {}
+
+        self.message = message
+        self.status_code = status_code
+        self.data = data
 
 
 class Success(JSONResponse):
@@ -35,16 +50,3 @@ class Success(JSONResponse):
         super().__init__(content=body, status_code=status_code)
 
 
-# class Error(JSONResponse):
-#     def __init__(self, data=None, message=None, status_code=HTTPStatus.BAD_REQUEST):
-#         body = {"is_success": False, "message": message, "data": data}
-#         super().__init__(content=body, status_code=status_code)
-
-
-class Error(Exception):
-    def __init__(self, status_code: int = HTTPStatus.BAD_REQUEST, message: str = '未知错误', data=None):
-        if data is None:
-            data = {}
-        self.message = message
-        self.status_code = status_code
-        self.data = data
