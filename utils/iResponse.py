@@ -35,10 +35,16 @@ class Success(JSONResponse):
         super().__init__(content=body, status_code=status_code)
 
 
-class Error(Exception):
-    def __init__(self, status_code: int = HTTPStatus.BAD_REQUEST, message: str = '未知错误', data=None):
-        if data is None:
-            data = {}
-        self.message = message
-        self.status_code = status_code
-        self.data = data
+class Error(JSONResponse):
+    def __init__(self, data=None, message=None, status_code=HTTPStatus.BAD_REQUEST):
+        body = {"is_success": False, "message": message, "data": data}
+        super().__init__(content=body, status_code=status_code)
+
+
+# class Error(Exception):
+#     def __init__(self, status_code: int = HTTPStatus.BAD_REQUEST, message: str = '未知错误', data=None):
+#         if data is None:
+#             data = {}
+#         self.message = message
+#         self.status_code = status_code
+#         self.data = data

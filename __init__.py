@@ -1,18 +1,14 @@
 # Author: IFCZT
 # Email: ifczt@qq.com
-import atexit
-from urllib.request import Request
 
-from fastapi.exception_handlers import request_validation_exception_handler
-from fastapi.exceptions import ValidationError, RequestValidationError
-import uvicorn
 from fastapi import FastAPI, Depends
+from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from .utils.globals import g
 from .api.BaseRoute import BaseRoute
 from .db import DBManager
+from .utils.globals import g
 from .utils.iResponse import HTTPStatus, Error
 
 
