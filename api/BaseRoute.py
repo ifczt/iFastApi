@@ -6,7 +6,7 @@ from .BaseModel import ListModel, QueryModel, UpdateModel
 from .RoureManager import RouteManager
 from .RouteInfo import RouteInfo
 from ..utils.toolfuns import path_to_key
-
+from ..utils.iResponse import Error, HTTPStatus
 
 class BaseRoute:
     __is_initialized = False
@@ -28,7 +28,7 @@ class BaseRoute:
     @property
     def db(self):
         if not self._db:
-            raise NotImplementedError()
+            raise Error(message='未初始化数据库', status_code=HTTPStatus.SERVICE_UNAVAILABLE)
         return self._db
 
     @db.setter
