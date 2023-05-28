@@ -30,7 +30,7 @@ class DBManager:
             raise Exception('数据库连接地址未配置')
 
         self._engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
-        self._session_factory = sessionmaker(bind=None, autocommit=False, autoflush=False)
+        self._session_factory = sessionmaker(bind=None, autocommit=False, autoflush=False, query_cls=BaseQuery)
 
     def auto(self, request: Request):
         """
