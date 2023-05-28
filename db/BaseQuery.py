@@ -3,7 +3,7 @@
 from typing import Tuple, Any
 
 from sqlalchemy import orm
-
+from ..utils.iResponse import Error, HTTPStatus
 
 class BaseQuery(orm.Query):
     def _all_selected_columns(self):
@@ -22,3 +22,9 @@ class BaseQuery(orm.Query):
             delattr(instance, attr)
         instance.__dict__.update(kw)
         return instance
+
+    def first_or_404(self, msg='资源不存在'):
+        rv = self.first()
+        if not rv:
+            raise Error(message=msg, status_code=HTTPStatus.NOT_FOUND)
+        return rv
