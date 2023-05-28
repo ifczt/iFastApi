@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from .BaseModel import ListModel, QueryModel, UpdateModel
 from .RoureManager import RouteManager
 from .RouteInfo import RouteInfo
-from ..utils import path_to_key
+from ..utils.toolfuns import path_to_key
 
 
 class BaseRoute:

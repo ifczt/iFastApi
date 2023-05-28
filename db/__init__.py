@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from ..utils import path_to_key
+from ..utils.toolfuns import path_to_key
 from .BaseQuery import BaseQuery
 from ..utils.singleton import Singleton
 from ..utils.time import time as t
