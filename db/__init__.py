@@ -102,7 +102,7 @@ class BaseDB(DBManager.base):
 
     def __init__(self, *args, **kwargs):
         self.set_attrs(kwargs)
-        self.create_time = t.int_time(modes="ms")
+        self.create_time = t.int_time(modes="s")
 
     '''输出dict 相关方法'''
 
