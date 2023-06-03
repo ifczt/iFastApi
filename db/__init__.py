@@ -11,6 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from ..utils.toolfuns import path_to_key
+from ..utils.iResponse import  Error
 from .BaseQuery import BaseQuery
 from ..utils.singleton import Singleton
 from ..utils.time import time as t
@@ -173,6 +174,24 @@ class BaseDB(DBManager.base):
             sql = sql.order_by(text(order_by))
         result = sql.limit(size).offset((page - 1) * size).all()
         return [dict(row) for row in result], total
+
+    @classmethod
+    def remove(cls, ident=None, query_dict=None):
+        """
+        删除
+        :param ident: id
+        :param query_dict: 查询条件
+        """
+        condition = None
+        if ident:
+            condition = and_(cls.id == ident)
+        if query_dict:
+            condition = cls.build_query_condition(query_dict)
+        if not condition:
+            raise Error(message='删除条件不能为空')
+
+        cls.query.filter(condition).update({cls.status: 0})
+        cls.db.commit()
 
     @classmethod
     def build_query_condition(cls, query_dict=None):
