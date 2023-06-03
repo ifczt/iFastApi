@@ -22,7 +22,8 @@ class QueryModel(BaseModel):
 class PageModel(BaseModel):
     """分页模型"""
     page: int = File(None)
-    size: int = File(None)
+    # size 不能超过1000
+    size: int = File(None, gt=0, lt=1000)
 
 
 class UpdateModel(QueryModel):

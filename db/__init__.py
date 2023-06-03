@@ -157,10 +157,10 @@ class BaseDB(DBManager.base):
         return dict(result or {})
 
     @classmethod
-    def get_list(cls, limit=1, size=20, query_dict=None, order_by=None):
+    def get_list(cls, page=1, size=20, query_dict=None, order_by=None):
         """
         获取列表
-        :param limit: 页码
+        :param page: 页码
         :param size: 每页数量
         :param query_dict: 查询条件
         :param order_by: 排序 id^ = id desc id = id asc
@@ -170,7 +170,7 @@ class BaseDB(DBManager.base):
         if order_by:
             order_by = re.sub(r'(\w+)\^', r'\1 desc', order_by)
             sql = sql.order_by(text(order_by))
-        result = sql.limit(size).offset((limit - 1) * size).all()
+        result = sql.limit(size).offset((page - 1) * size).all()
         return [dict(row) for row in result]
 
     @classmethod
