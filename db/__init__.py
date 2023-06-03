@@ -166,12 +166,13 @@ class BaseDB(DBManager.base):
         :param order_by: 排序 id^ = id desc id = id asc
         """
         condition = cls.build_query_condition(query_dict)
+        total = cls.query.filter(condition).count()
         sql = cls.query.filter(condition)
         if order_by:
             order_by = re.sub(r'(\w+)\^', r'\1 desc', order_by)
             sql = sql.order_by(text(order_by))
         result = sql.limit(size).offset((page - 1) * size).all()
-        return [dict(row) for row in result]
+        return [dict(row) for row in result], total
 
     @classmethod
     def build_query_condition(cls, query_dict=None):
