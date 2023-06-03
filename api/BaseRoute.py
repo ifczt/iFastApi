@@ -37,10 +37,10 @@ class BaseRoute:
         self._db = db
 
     def remove(self, data: QueryModel):
-        return Success(message='删除成功', data=self.db.remove(data.dict()))
+        return Success(message='删除成功', data=self.db.remove(**data.dict()))
 
     def delete(self, data: QueryModel):
-        return Success(message='删除成功', data=self.db.delete(data.dict()))
+        return Success(message='删除成功', data=self.db.delete(**data.dict()))
 
     def update(self, data: UpdateModel):
         return Success(message='更新成功', data=self.db.update(**data.dict()))

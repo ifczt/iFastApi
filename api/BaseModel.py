@@ -14,7 +14,12 @@ class CaptchaMode(BaseModel):
     captcha_val: float = File(None)
 
 
-class QueryModel(BaseModel):
+class IdentModel(BaseModel):
+    """ident模型"""
+    ident: str = File(None)
+
+
+class QueryModel(IdentModel):
     """查询模型"""
     query_dict: dict = File(None)
 

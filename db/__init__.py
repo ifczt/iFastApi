@@ -185,7 +185,7 @@ class BaseDB(DBManager.base):
         condition = None
         if ident:
             condition = and_(cls.id == ident)
-        if query_dict:
+        elif query_dict:
             condition = cls.build_query_condition(query_dict)
         if not condition:
             raise Error(message='删除条件不能为空')
