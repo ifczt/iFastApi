@@ -182,13 +182,13 @@ class BaseDB(DBManager.base):
         :param ident: id
         :param query_dict: 查询条件
         """
+        if all([ident, query_dict]):
+            raise Error(message='删除条件不能为空')
         condition = None
         if ident:
             condition = and_(cls.id == ident)
         elif query_dict:
             condition = cls.build_query_condition(query_dict)
-        if not condition:
-            raise Error(message='删除条件不能为空')
 
         cls.query.filter(condition).update({cls.status: 0})
         cls.db.commit()
