@@ -6,7 +6,8 @@ from .BaseModel import ListModel, QueryModel, UpdateModel
 from .RoureManager import RouteManager
 from .RouteInfo import RouteInfo
 from ..utils.toolfuns import path_to_key
-from ..utils.iResponse import Error, HTTPStatus
+from ..utils.iResponse import Error, HTTPStatus, Success
+
 
 class BaseRoute:
     __is_initialized = False
@@ -36,19 +37,19 @@ class BaseRoute:
         self._db = db
 
     def remove(self, data: QueryModel):
-        return self.db.remove(data.dict())
+        return Success(message='删除成功', data=self.db.remove(data.dict()))
 
     def delete(self, data: QueryModel):
-        return self.db.delete(data.dict())
+        return Success(message='删除成功', data=self.db.delete(data.dict()))
 
     def update(self, data: UpdateModel):
-        return self.db.update(**data.dict())
+        return Success(message='更新成功', data=self.db.update(**data.dict()))
 
     def get_list(self, data: ListModel):
-        return self.db.get_list(**data.dict())
+        return Success(message='获取列表成功', data=self.db.get_list(**data.dict()))
 
     def get_info(self, data: QueryModel):
-        return self.db.get_info(**data.dict())
+        return Success(message='获取信息成功', data=self.db.get_info(**data.dict()))
 
     @classmethod
     def init_router(cls, app):
