@@ -11,7 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from ..utils.toolfuns import path_to_key
-from ..utils.iResponse import  Error
+from ..utils.iResponse import Error
 from .BaseQuery import BaseQuery
 from ..utils.singleton import Singleton
 from ..utils.time import time as t
@@ -100,6 +100,7 @@ class BaseDB(DBManager.base):
     create_time = Column(Integer, comment='生成时间')
     status = Column(SmallInteger, default=1, comment='是否软删除 0 / 1')
     fileds = []
+    protect_fileds = ['id', 'create_time']
 
     def __init__(self, *args, **kwargs):
         self.set_attrs(kwargs)
@@ -191,6 +192,29 @@ class BaseDB(DBManager.base):
             condition = cls.build_query_condition(query_dict)
 
         cls.query.filter(condition).update({cls.status: 0})
+        cls.db.commit()
+
+    @classmethod
+    def update(cls, update_dict, ident=None, query_dict=None):
+        """
+        更新
+        :param update_dict: 更新内容
+        :param ident: id
+        :param query_dict: 查询条件
+        """
+        if all([ident, query_dict]):
+            raise Error(message='更新条件不能为空')
+        condition = None
+        if ident:
+            condition = and_(cls.id == ident)
+        elif query_dict:
+            condition = cls.build_query_condition(query_dict)
+        # 过滤掉不允许更新的字段
+        for key in cls.protect_fileds:
+            update_dict.pop(key, None)
+        if not update_dict:
+            raise Error(message='无更新内容')
+        cls.query.filter(condition).update(update_dict)
         cls.db.commit()
 
     @classmethod

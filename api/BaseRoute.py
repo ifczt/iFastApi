@@ -46,7 +46,7 @@ class BaseRoute:
         return Success(message='更新成功', data=self.db.update(**data.dict()))
 
     def get_list(self, data: ListModel):
-        _list, total = self.db.get_list(**data.dict())
+        _list, total = self.db.get_list(**data.dict() if data.dict() else None)
         return Success(message='获取列表成功', data=_list, total=total)
 
     def get_info(self, data: QueryModel):
