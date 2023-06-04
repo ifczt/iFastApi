@@ -31,7 +31,7 @@ class PageModel(BaseModel):
     size: int = File(None, gt=0, lt=1000)
 
 
-class UpdateModel(QueryModel):
+class UpdateModel(QueryModel, IdentModel):
     """更新模型"""
     update_dict: dict = File(None)
 
