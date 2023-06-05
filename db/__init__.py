@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from ..utils.toolfuns import path_to_key
+from ..utils.toolfuns import path_to_key, with_condition
 from ..utils.iResponse import Error
 from .BaseQuery import BaseQuery
 from ..utils.singleton import Singleton
@@ -177,19 +177,14 @@ class BaseDB(DBManager.base):
         return [dict(row) for row in result], total
 
     @classmethod
-    def remove(cls, ident=None, query_dict=None):
+    @with_condition
+    def remove(cls, condition):
         """
         删除
-        :param ident: id
-        :param query_dict: 查询条件
+        :param condition: 查询条件
         """
-        if not any([ident, query_dict]):
+        if not condition:
             raise Error(message='删除条件不能为空')
-        condition = None
-        if ident:
-            condition = and_(cls.id == ident)
-        elif query_dict:
-            condition = cls.build_query_condition(query_dict)
 
         cls.query.filter(condition).update({cls.status: 0})
         cls.db.commit()
@@ -202,20 +197,15 @@ class BaseDB(DBManager.base):
         return update_dict
 
     @classmethod
-    def update(cls, update_dict, ident=None, query_dict=None):
+    @with_condition
+    def update(cls, update_dict, condition):
         """
         更新
         :param update_dict: 更新内容
-        :param ident: id
-        :param query_dict: 查询条件
+        :param condition: 查询条件
         """
-        if not any([ident, query_dict]):
-            raise Error(message='更新条件不能为空')
-        condition = None
-        if ident:
-            condition = and_(cls.id == ident)
-        elif query_dict:
-            condition = cls.build_query_condition(query_dict)
+        if not condition:
+            raise Error(message='删除条件不能为空')
 
         update_dict = cls.filter_update_dict(update_dict)
         if not update_dict:
