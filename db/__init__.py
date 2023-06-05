@@ -183,7 +183,7 @@ class BaseDB(DBManager.base):
         :param ident: id
         :param query_dict: 查询条件
         """
-        if all([ident, query_dict]):
+        if not any([ident, query_dict]):
             raise Error(message='删除条件不能为空')
         condition = None
         if ident:
@@ -195,6 +195,13 @@ class BaseDB(DBManager.base):
         cls.db.commit()
 
     @classmethod
+    def filter_update_dict(cls, update_dict):
+        # 过滤掉不允许更新的字段
+        for key in cls.protect_fileds:
+            update_dict.pop(key, None)
+        return update_dict
+
+    @classmethod
     def update(cls, update_dict, ident=None, query_dict=None):
         """
         更新
@@ -202,16 +209,15 @@ class BaseDB(DBManager.base):
         :param ident: id
         :param query_dict: 查询条件
         """
-        if all([ident, query_dict]):
+        if not any([ident, query_dict]):
             raise Error(message='更新条件不能为空')
         condition = None
         if ident:
             condition = and_(cls.id == ident)
         elif query_dict:
             condition = cls.build_query_condition(query_dict)
-        # 过滤掉不允许更新的字段
-        for key in cls.protect_fileds:
-            update_dict.pop(key, None)
+
+        update_dict = cls.filter_update_dict(update_dict)
         if not update_dict:
             raise Error(message='无更新内容')
         cls.query.filter(condition).update(update_dict)

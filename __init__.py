@@ -11,6 +11,7 @@ from .api.BaseRoute import BaseRoute
 from .db import DBManager
 from .utils.globals import g
 from .utils.iResponse import HTTPStatus, Error, JSONResponse
+from .utils.jwtToken import JWTBearer
 
 
 class IFastAPI:
@@ -18,8 +19,8 @@ class IFastAPI:
     config: 配置文件
         - ORIGINS: 允许跨域的域名 默认为'*'
     """
-    app = FastAPI(dependencies=[Depends(DBManager().auto)])
     config = None
+    app = FastAPI(dependencies=[Depends(DBManager().auto), Depends(JWTBearer())])
 
     def setup(self):
         self.setup_config()

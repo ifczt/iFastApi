@@ -33,7 +33,7 @@ class PageModel(BaseModel):
 
 class UpdateModel(QueryModel, IdentModel):
     """更新模型"""
-    update_dict: dict = File(None)
+    update_dict: dict = File(...)
 
 
 class IDModel(BaseModel):

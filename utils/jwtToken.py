@@ -37,8 +37,9 @@ class JWTBearer(HTTPBearer):
             account_info = JWTBearer.verify_jwt(credentials.credentials)
             if not account_info:
                 raise Error(status_code=HTTPStatus.FORBIDDEN, message="无效令牌或过期令牌。")
-            JWTBearer.verify_type(self.rules, account_info)
-            g.u_id = account_info.get('u_id')
+            # 权限验证暂时没有设计 后面加上
+            # JWTBearer.verify_type(self.rules, account_info)
+            g.u_id = account_info.get('u_id', account_info.get('id'))
             return account_info
         else:
             raise Error(status_code=HTTPStatus.FORBIDDEN, message="无效的授权代码。")
