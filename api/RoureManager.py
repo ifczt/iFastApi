@@ -18,6 +18,9 @@ class RouteManager:
             return True
         return power in self.auth[route]
 
+    def path_need_auth(self, path_key):
+        return path_key not in self.auth
+
     def add_use_db_route(self, route):
         self.use_db_route.add(route)
 

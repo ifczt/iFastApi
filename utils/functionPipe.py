@@ -4,6 +4,8 @@
 使用方法:
 FunctionPipe(value) | (lambda x: x + 1) | (lambda x: x + 2) | print
 """
+import json
+from datetime import datetime
 
 
 class FunctionPipe:
@@ -13,3 +15,10 @@ class FunctionPipe:
     def __or__(self, func):
         self.value = func(self.value)
         return self
+
+
+class CustomEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)

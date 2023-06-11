@@ -3,6 +3,8 @@ import re
 from random import random
 import inspect
 from sqlalchemy import and_
+
+
 # 多个装饰器合并
 # 列如 @icompose(classmethod, idb)
 def icompose(*funs):
@@ -42,8 +44,10 @@ def with_condition(func):
                 condition = cls.build_query_condition(query_dict)
 
         kwargs['condition'] = condition
+
         # 找出kwargs中与func参数匹配的键值对
         matched_kwargs = {param: kwargs[param] for param in func_params if param in kwargs}
-        return func(*args, **matched_kwargs)
+        if len(condition) > 0:
+            return func(*args, **matched_kwargs)
 
     return wrapper

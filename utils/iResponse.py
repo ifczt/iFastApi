@@ -1,5 +1,10 @@
+import json
+import typing
+
 from fastapi import HTTPException
 from starlette.responses import JSONResponse as _JSONResponse
+
+from iFastApi.utils.functionPipe import CustomEncoder
 
 
 class HTTPStatus:
@@ -32,6 +37,16 @@ class JSONResponse(_JSONResponse):
         if message:
             content['message'] = message
         super().__init__(content=content, status_code=status_code, headers=headers, media_type=media_type, background=background)
+
+    def render(self, content: typing.Any) -> bytes:
+        return json.dumps(
+            content,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=None,
+            separators=(",", ":"),
+            cls=CustomEncoder
+        ).encode("utf-8")
 
 
 class Error(Exception):

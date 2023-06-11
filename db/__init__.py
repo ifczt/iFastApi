@@ -177,14 +177,23 @@ class BaseDB(DBManager.base):
         return [dict(row) for row in result], total
 
     @classmethod
+    def insert(cls, insert_dict):
+        """
+        插入
+        :param insert_dict: 插入内容
+        """
+        obj = cls(**insert_dict)
+        cls.db.add(obj)
+        cls.db.commit()
+        return obj.id
+
+    @classmethod
     @with_condition
     def remove(cls, condition):
         """
         删除
         :param condition: 查询条件
         """
-        if not condition:
-            raise Error(message='删除条件不能为空')
 
         cls.query.filter(condition).update({cls.status: 0})
         cls.db.commit()
@@ -204,8 +213,8 @@ class BaseDB(DBManager.base):
         :param update_dict: 更新内容
         :param condition: 查询条件
         """
-        if not condition:
-            raise Error(message='删除条件不能为空')
+        if condition is None:
+            raise Error(message='查询条件不能为空')
 
         update_dict = cls.filter_update_dict(update_dict)
         if not update_dict:
@@ -234,7 +243,7 @@ class BaseDB(DBManager.base):
             elif key.startswith('in:'):
                 condition = and_(condition, getattr(cls, key[3:]).in_(value))
             elif key.startswith('like:'):
-                condition = and_(condition, getattr(cls, key[5:]).like(value))
+                condition = and_(condition, getattr(cls, key[5:]).like('%'+value+'%'))
             elif key.startswith('ilike:'):
                 condition = and_(condition, getattr(cls, key[6:]).ilike(value))
             elif key.startswith('is:'):

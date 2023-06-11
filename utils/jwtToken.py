@@ -8,6 +8,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .iResponse import Error, HTTPStatus
 from .globals import g
+from .toolfuns import path_to_key
+from ..api.RoureManager import RouteManager
 
 SECRET_KEY = "4105177d86fa16a2747212a7101dafda5c4027a4e4f64054"  # 密钥
 ALGORITHM = "HS256"  # 算法
@@ -17,6 +19,7 @@ class JWTBearer(HTTPBearer):
     def __init__(self, rules=None, auto_error: bool = False):
         self.rules = rules
         super(JWTBearer, self).__init__(auto_error=auto_error)
+        self.roure_manager = RouteManager()
 
     @staticmethod
     def token(data: dict, expires_time=None):
@@ -30,6 +33,8 @@ class JWTBearer(HTTPBearer):
         return __token
 
     async def __call__(self, request: Request):
+        if self.roure_manager.path_need_auth(path_to_key(request.url.path)):
+            return True
         credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
