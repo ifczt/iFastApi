@@ -47,7 +47,7 @@ def with_condition(func):
 
         # 找出kwargs中与func参数匹配的键值对
         matched_kwargs = {param: kwargs[param] for param in func_params if param in kwargs}
-        if len(condition) > 0:
+        if len(condition.__str__()) > 0:
             return func(*args, **matched_kwargs)
 
     return wrapper

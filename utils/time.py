@@ -15,6 +15,14 @@ class Time:
         """
         return datetime.datetime.utcnow() + datetime.timedelta(hours=8)
 
+    def get_time_after_days(self, n):
+        """
+        获取 N 天后的时间
+        :param n: int 天数
+        :return datetime.datetime
+        """
+        return self.now + datetime.timedelta(days=n)
+
     def format_time(self, default_datetime: datetime.datetime = None, time_format="%Y-%m-%d %H:%M:%S"):
         """
         获取格式化时间 默认时间为当前时间
@@ -25,6 +33,26 @@ class Time:
         if not default_datetime:
             default_datetime = self.now
         return default_datetime.strftime(time_format)
+
+    def get_time_start(self, default_datetime: datetime.datetime = None):
+        """
+        获取指定时间的当天开始时间
+        :param default_datetime: datetime.datetime 转换datetime时间对象
+        :return 2023-04-24 00:00:00
+        """
+        if not default_datetime:
+            default_datetime = self.now
+        return default_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    def get_time_end(self, default_datetime: datetime.datetime = None):
+        """
+        获取指定时间的当天结束时间
+        :param default_datetime: datetime.datetime 转换datetime时间对象
+        :return 2023-04-24 23:59:59
+        """
+        if not default_datetime:
+            default_datetime = self.now
+        return default_datetime.replace(hour=23, minute=59, second=59, microsecond=999999)
 
     def int_time(self, modes='s'):
         """

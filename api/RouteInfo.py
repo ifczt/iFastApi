@@ -4,7 +4,7 @@ from collections import UserDict
 
 
 class RouteInfo(UserDict):
-    def __init__(self, path, endpoint, methods=None, dependencies=None, summary=None, use_db=True, verify_auth=True,
+    def __init__(self, path, endpoint, methods=None, dependencies=None, summary=None, use_db=True, verify_auth=None,
                  need_captcha=True):
         """
         :param path: 访问路径

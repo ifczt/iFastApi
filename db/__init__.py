@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
+from ..api.RoureManager import RouteManager
 from ..utils.toolfuns import path_to_key, with_condition
 from ..utils.iResponse import Error
 from .BaseQuery import BaseQuery
@@ -25,6 +26,7 @@ class DBManager:
         self._session_factory = None
         self._local = None
         self._engine = None
+        self.roure_manager = RouteManager()
 
     def setup(self, config):
         if not config.SQLALCHEMY_DATABASE_URI:
@@ -39,10 +41,13 @@ class DBManager:
         """
 
         path = path_to_key(request.url.path)
-        try:
-            yield self.get_session()
-        finally:
-            self.close_session()
+        if not self.roure_manager.is_use_db_route(path):
+            yield
+        else:
+            try:
+                yield self.get_session()
+            finally:
+                self.close_session()
 
     @property
     def engine(self):
@@ -84,7 +89,11 @@ class DBManager:
         关闭当前线程的会话对象
         """
         if hasattr(self._local, "session"):
-            self._local.session.commit()
+            try:
+                self._local.session.commit()
+            except Exception as e:
+                self._local.session.rollback()
+
             self._local.session.close()
             self._local.session.remove()
             del self._local.session
@@ -185,7 +194,7 @@ class BaseDB(DBManager.base):
         obj = cls(**insert_dict)
         cls.db.add(obj)
         cls.db.commit()
-        return obj.id
+        return obj
 
     @classmethod
     @with_condition
@@ -203,6 +212,10 @@ class BaseDB(DBManager.base):
         # 过滤掉不允许更新的字段
         for key in cls.protect_fileds:
             update_dict.pop(key, None)
+        # 不在表中的字段
+        for key in list(update_dict.keys()):
+            if key not in cls.__table__.columns.keys():
+                update_dict.pop(key, None)
         return update_dict
 
     @classmethod
@@ -215,8 +228,9 @@ class BaseDB(DBManager.base):
         """
         if condition is None:
             raise Error(message='查询条件不能为空')
-
+        print(update_dict)
         update_dict = cls.filter_update_dict(update_dict)
+        print(update_dict)
         if not update_dict:
             raise Error(message='无更新内容')
         cls.query.filter(condition).update(update_dict)
@@ -255,6 +269,7 @@ class BaseDB(DBManager.base):
             elif key.startswith('isnotnull:'):
                 condition = and_(condition, getattr(cls, key[9:]) is not None)
             elif key.startswith('between:'):
+                if isinstance(value, str):
+                    value = [value + ' 00:00:00', value + ' 23:59:59']
                 condition = and_(condition, getattr(cls, key[8:]).between(value[0], value[1]))
-
         return condition

@@ -33,7 +33,7 @@ class JWTBearer(HTTPBearer):
         return __token
 
     async def __call__(self, request: Request):
-        if self.roure_manager.path_need_auth(path_to_key(request.url.path)):
+        if not self.roure_manager.path_need_token(path_to_key(request.url.path)):
             return True
         credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
@@ -42,8 +42,8 @@ class JWTBearer(HTTPBearer):
             account_info = JWTBearer.verify_jwt(credentials.credentials)
             if not account_info:
                 raise Error(status_code=HTTPStatus.FORBIDDEN, message="无效令牌或过期令牌。")
-            # 权限验证暂时没有设计 后面加上
-            # JWTBearer.verify_type(self.rules, account_info)
+            if not self.roure_manager.check_auth(path_to_key(request.url.path), account_info.get(g.config.POWER_KEY)):
+                raise Error(status_code=HTTPStatus.FORBIDDEN, message="权限不足，拒绝继续访问")
             g.u_id = account_info.get('u_id', account_info.get('id'))
             return account_info
         else:

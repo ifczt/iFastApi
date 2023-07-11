@@ -51,6 +51,7 @@ class IFastAPI:
     def run(self, config):
         self.config = IFastAPI.config = config
         g.config = config
+
         self.setup()
 
     @staticmethod
