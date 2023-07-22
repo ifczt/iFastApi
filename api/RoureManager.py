@@ -20,7 +20,6 @@ class RouteManager:
     def check_auth(self, route, power):
         if route not in self.auth:
             return True
-        print(power,self.auth[route])
         return power in self.auth[route]
 
     def path_need_token(self, path_key):

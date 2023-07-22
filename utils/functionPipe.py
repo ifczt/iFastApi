@@ -19,6 +19,9 @@ class FunctionPipe:
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, obj):
+        from ..db import BaseDB
         if isinstance(obj, datetime):
             return obj.isoformat()
+        if isinstance(obj, BaseDB):
+            return dict(obj)
         return super().default(obj)

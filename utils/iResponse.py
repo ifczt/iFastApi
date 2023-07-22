@@ -4,7 +4,7 @@ import typing
 from fastapi import HTTPException
 from starlette.responses import JSONResponse as _JSONResponse
 
-from iFastApi.utils.functionPipe import CustomEncoder
+from .functionPipe import CustomEncoder
 
 
 class HTTPStatus:

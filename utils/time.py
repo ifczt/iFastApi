@@ -140,5 +140,13 @@ class Time:
             dates.append(date)
         return dates
 
+    @property
+    def today(self):
+        """
+        获取今天的日期
+        :return datetime.datetime
+        """
+        return self.now.date()
+
 
 time = Time()
