@@ -104,3 +104,4 @@ class IFastAPI:
 
         message = f"参数[{','.join(locs) if isinstance(locs, list) else locs}]未通过验证" if locs else '未接受到任何有效参数'
         return JSONResponse(message=message, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
+
