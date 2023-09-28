@@ -1,8 +1,10 @@
 # Author: IFCZT
 # Email: ifczt@qq.com
 import re
+import time
 from threading import local
 
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from starlette.requests import Request
 
 from sqlalchemy import Column, Integer, SmallInteger, text, and_
@@ -23,9 +25,11 @@ class DBManager:
     base = declarative_base()
 
     def __init__(self):
-        self._session_factory = None
         self._local = None
         self._engine = None
+        self._session_factory = None
+        self._async_engine = None
+        self._async_session_factory = None
         self.roure_manager = RouteManager()
 
     def setup(self, config):
@@ -33,7 +37,9 @@ class DBManager:
             raise Exception('数据库连接地址未配置')
 
         self._engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
+        self._async_engine = create_async_engine(config.ASYNC_SQLALCHEMY_DATABASE_URI)
         self._session_factory = sessionmaker(bind=None, autocommit=False, autoflush=False, query_cls=BaseQuery)
+        self._async_session_factory = sessionmaker(bind=self._async_engine, class_=AsyncSession, expire_on_commit=False)
 
     def auto(self, request: Request):
         """
@@ -49,6 +55,7 @@ class DBManager:
             finally:
                 self.close_session()
 
+    # region 同步引擎
     @property
     def engine(self):
         if not self._engine:
@@ -58,6 +65,32 @@ class DBManager:
     @engine.setter
     def engine(self, database_uri):
         self._engine = create_engine(database_uri)
+
+    # endregion
+
+    # region 异步引擎
+    @property
+    def async_engine(self):
+        if not self._async_engine:
+            raise Exception('数据库未连接')
+        return self._async_engine
+
+    @async_engine.setter
+    def async_engine(self, database_uri):
+        self._async_engine = create_async_engine(database_uri)
+
+    # endregion
+
+    async def async_execute(self, sql, execute_type='read'):
+        async with self._async_session_factory() as session:
+            result = await session.execute(text(sql))
+            if execute_type == 'read':
+                result = result.fetchall()
+                print(result, time.time())
+                return result
+            elif execute_type == 'write':
+                await session.commit()
+                return result.lastrowid
 
     def execute(self, sql, execute_type='read'):
         """执行sql语句"""
@@ -257,7 +290,7 @@ class BaseDB(DBManager.base):
             elif key.startswith('in:'):
                 condition = and_(condition, getattr(cls, key[3:]).in_(value))
             elif key.startswith('like:'):
-                condition = and_(condition, getattr(cls, key[5:]).like('%'+value+'%'))
+                condition = and_(condition, getattr(cls, key[5:]).like('%' + value + '%'))
             elif key.startswith('ilike:'):
                 condition = and_(condition, getattr(cls, key[6:]).ilike(value))
             elif key.startswith('is:'):

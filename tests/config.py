@@ -16,13 +16,15 @@ class Config:
     DB_CONFIG = {
         "dialect": 'mysql',
         "driver": 'pymysql',
+        "async_driver": 'aiomysql',
         "username": 'root',
         "password": 'ifczt#IFCZT',
         "host": '127.0.0.1',
         "port": '3306',
         "database": 'ez.db'
     }
-    SQLALCHEMY_DATABASE_URI = "{dialect}+{driver}://{username}:{password}@{host}:{port}/{database}?charset=utf8".format(**DB_CONFIG)
+    SQLALCHEMY_DATABASE_URI = "{dialect}+{driver}://{username}:{password}@{host}:{port}/{database}?charset=utf8mb4".format(**DB_CONFIG)
+    ASYNC_SQLALCHEMY_DATABASE_URI = "{dialect}+{async_driver}://{username}:{password}@{host}:{port}/{database}?charset=utf8mb4".format(**DB_CONFIG)
     ACCESS_TOKEN_EXPIRES = timedelta(minutes=60*10)
     PARAM_TRANSLATE = {
         "account": "账号",

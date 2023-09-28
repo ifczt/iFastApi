@@ -59,9 +59,13 @@ class Error(Exception):
         self.data = data
 
 
-class Success(JSONResponse):
+class iResponse(JSONResponse):
     def __init__(self, data=None, message=None, status_code=HTTPStatus.OK, **kwargs):
-        body = {"success": True, "message": message, "data": data}
+        body = {"success": status_code < 300, "message": message, "data": data}
         if kwargs:
             body.update(kwargs)
         super().__init__(content=body, status_code=status_code)
+
+
+class Success(iResponse):
+    pass
