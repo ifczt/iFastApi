@@ -20,7 +20,7 @@ class BaseRoute:
             RouteInfo('/remove', self.remove, summary='软删除', verify_auth=True),
             RouteInfo('/delete', self.delete, summary='硬删除', verify_auth=True),
             RouteInfo('/update', self.update, summary='更新', verify_auth=True),
-            RouteInfo('/get_list', self.get_list, summary='获取列表', verify_auth=['ADMIN']),
+            RouteInfo('/get_list', self.get_list, summary='获取列表', verify_auth=True),
             RouteInfo('/get_info', self.get_info, summary='获取详情', verify_auth=True)
         ]
         self.roure_manager = RouteManager()
