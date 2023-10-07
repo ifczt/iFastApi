@@ -261,9 +261,7 @@ class BaseDB(DBManager.base):
         """
         if condition is None:
             raise Error(message='查询条件不能为空')
-        print(update_dict)
         update_dict = cls.filter_update_dict(update_dict)
-        print(update_dict)
         if not update_dict:
             raise Error(message='无更新内容')
         cls.query.filter(condition).update(update_dict)
@@ -272,7 +270,8 @@ class BaseDB(DBManager.base):
     @classmethod
     def build_query_condition(cls, query_dict=None):
         condition = and_(cls.status == 1)
-
+        if not query_dict:
+            return condition
         for key, value in query_dict.items():
 
             if key.startswith('eq:'):
