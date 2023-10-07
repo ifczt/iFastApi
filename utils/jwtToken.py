@@ -45,6 +45,7 @@ class JWTBearer(HTTPBearer):
             if not self.roure_manager.check_auth(path_to_key(request.url.path), account_info.get(g.config.POWER_KEY)):
                 raise Error(status_code=HTTPStatus.FORBIDDEN, message="权限不足，拒绝继续访问")
             g.u_id = account_info.get('u_id', account_info.get('id'))
+            g.identity = account_info.get('identity')
             return account_info
         else:
             raise Error(status_code=HTTPStatus.FORBIDDEN, message="无效的授权代码。")

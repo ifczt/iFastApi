@@ -25,6 +25,11 @@ class BaseQuery(orm.Query):
         instance.__dict__.update(kw)
         return instance
 
+    def filter_by(self, **kwargs):
+        kwargs['status'] = kwargs.get('status', 1)
+        result = super(BaseQuery, self).filter_by(**kwargs)
+        return result
+
     def first_or_404(self, message='资源不存在'):
         rv = self.first()
         if not rv:
