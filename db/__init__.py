@@ -241,6 +241,17 @@ class BaseDB(DBManager.base):
         cls.db.commit()
 
     @classmethod
+    @with_condition
+    def delete(cls, condition):
+        """
+        删除
+        :param condition: 查询条件
+        """
+
+        cls.query.filter(condition).delete()
+        cls.db.commit()
+
+    @classmethod
     def filter_update_dict(cls, update_dict):
         # 过滤掉不允许更新的字段
         for key in cls.protect_fileds:
@@ -269,7 +280,8 @@ class BaseDB(DBManager.base):
 
     @classmethod
     def build_query_condition(cls, query_dict=None):
-        condition = and_(cls.status == 1)
+        # condition = and_(cls.status == 1)
+        condition = and_()
         if not query_dict:
             return condition
         for key, value in query_dict.items():
