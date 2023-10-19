@@ -82,7 +82,6 @@ class CodePic:
         将文件夹里的图片压缩为验证码图片规格大小 300x150
         """
         jpg_list = glob.glob(f'../{path}/*.jpg')
-        save_path_files_count = len(os.listdir(f'../{save_path}'))  # 已经生成的文件数量 后面生成的文件在基础上累加
         for i, jpg in enumerate(jpg_list):
             jpg_path = os.path.join('.', jpg)
             im = Image.open(jpg_path)
@@ -105,4 +104,6 @@ class CodePic:
                 f'../{save_path}/{uuid.uuid4()}.jpg', 'jpeg')
 
             os.remove(jpg_path)
+
+
 

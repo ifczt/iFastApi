@@ -66,6 +66,16 @@ class DBManager:
     def engine(self, database_uri):
         self._engine = create_engine(database_uri)
 
+    def execute(self, sql, execute_type='read'):
+        """执行sql语句"""
+        with self.engine.connect() as conn:
+            result = conn.execute(text(sql))
+            if execute_type == 'read':
+                return result
+            elif execute_type == 'write':
+                conn.commit()
+                return result.lastrowid
+
     # endregion
 
     # region 异步引擎
@@ -79,28 +89,17 @@ class DBManager:
     def async_engine(self, database_uri):
         self._async_engine = create_async_engine(database_uri)
 
-    # endregion
-
     async def async_execute(self, sql, execute_type='read'):
         async with self._async_session_factory() as session:
             result = await session.execute(text(sql))
             if execute_type == 'read':
                 result = result.fetchall()
-                print(result, time.time())
                 return result
             elif execute_type == 'write':
                 await session.commit()
                 return result.lastrowid
 
-    def execute(self, sql, execute_type='read'):
-        """执行sql语句"""
-        with self.engine.connect() as conn:
-            result = conn.execute(text(sql))
-            if execute_type == 'read':
-                return result
-            elif execute_type == 'write':
-                conn.commit()
-                return result.lastrowid
+    # endregion
 
     def get_session(self):
         """
@@ -269,7 +268,10 @@ class BaseDB(DBManager.base):
 
     @classmethod
     def build_query_condition(cls, query_dict=None):
-        condition = and_(cls.status == 1)
+        if 'eq:status' not in query_dict:
+            condition = and_(cls.status == 1)
+        else:
+            condition = and_()
         if not query_dict:
             return condition
         for key, value in query_dict.items():
