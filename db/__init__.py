@@ -240,6 +240,17 @@ class BaseDB(DBManager.base):
         cls.db.commit()
 
     @classmethod
+    @with_condition
+    def delete(cls, condition):
+        """
+        删除
+        :param condition: 查询条件
+        """
+
+        cls.query.filter(condition).delete()
+        cls.db.commit()
+
+    @classmethod
     def filter_update_dict(cls, update_dict):
         # 过滤掉不允许更新的字段
         for key in cls.protect_fileds:
