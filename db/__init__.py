@@ -279,6 +279,8 @@ class BaseDB(DBManager.base):
 
     @classmethod
     def build_query_condition(cls, query_dict=None):
+        if not query_dict:
+            query_dict = {}
         if 'eq:status' not in query_dict:
             condition = and_(cls.status == 1)
         else:

@@ -7,13 +7,32 @@ from .singleton import Singleton
 
 @Singleton
 class Time:
+    TIME_ZONE = {
+        'UTC': 'UTC',
+        'ch': 'Asia/Shanghai',
+        'en': 'Europe/London',
+        'brazil': 'Brazil/East',
+    }
+
+    def __init__(self):
+        self._time_zone = pytz.timezone(self.TIME_ZONE['ch'])
+
+    @property
+    def time_zone(self):
+        return self._time_zone
+
+    @time_zone.setter
+    def time_zone(self, value):
+        self._time_zone = pytz.timezone(value)
+
     @property
     def now(self):
         """
-        获取当前时间 (UTC+8)
+        获取当前时间
         :return datetime.datetime 2023-04-24 17:34:00.758249
         """
-        return datetime.datetime.utcnow() + datetime.timedelta(hours=8)
+
+        return datetime.datetime.now(self.time_zone)
 
     def get_time_after_days(self, n):
         """
