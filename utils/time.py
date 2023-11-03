@@ -25,6 +25,23 @@ class Time:
     def time_zone(self, value):
         self._time_zone = pytz.timezone(value)
 
+    def get_start_end_timestamp(self, date_str, timezone=None):
+        # 将日期字符串转换为日期对象
+        date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+
+        # 创建时区对象
+        tz = pytz.timezone(timezone) if timezone else self.time_zone
+
+        # 获取当天最开始的时间戳
+        start_dt = tz.localize(datetime.datetime.combine(date, datetime.time.min))
+        start_timestamp = int(start_dt.timestamp())
+
+        # 获取当天最后的时间戳
+        end_dt = tz.localize(datetime.datetime.combine(date, datetime.time.max))
+        end_timestamp = int(end_dt.timestamp())
+
+        return start_timestamp, end_timestamp
+
     @property
     def now(self):
         """
