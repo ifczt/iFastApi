@@ -5,7 +5,7 @@
 FunctionPipe(value) | (lambda x: x + 1) | (lambda x: x + 2) | print
 """
 import json
-from datetime import datetime
+from datetime import datetime,date
 
 
 class FunctionPipe:
@@ -20,7 +20,7 @@ class FunctionPipe:
 class CustomEncoder(json.JSONEncoder):
     def default(self, obj):
         from ..db import BaseDB
-        if isinstance(obj, datetime):
+        if isinstance(obj, datetime) or isinstance(obj, date):
             return obj.isoformat()
         if isinstance(obj, BaseDB):
             return dict(obj)
