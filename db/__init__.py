@@ -7,7 +7,7 @@ from threading import local
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from starlette.requests import Request
 
-from sqlalchemy import Column, Integer, SmallInteger, text, and_
+from sqlalchemy import Column, Integer, SmallInteger, text, and_, event
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -18,6 +18,17 @@ from ..utils.iResponse import Error
 from .BaseQuery import BaseQuery
 from ..utils.singleton import Singleton
 from ..utils.time import time as t
+
+
+def ping_listener(dbapi_con, con_record, con_proxy):
+    """
+    监听连接的事件，在每次会话开始时执行ping操作以确保连接的有效性
+    """
+    try:
+        dbapi_con.ping(reconnect=True, attempts=3, delay=0.5)
+    except Exception as e:
+        # 处理ping异常，例如记录日志
+        pass
 
 
 @Singleton
@@ -32,6 +43,7 @@ class DBManager:
         self._async_session_factory = None
         self.roure_manager = RouteManager()
 
+
     def setup(self, config):
         if not hasattr(config, 'SQLALCHEMY_DATABASE_URI'):
             raise Exception('数据库连接地址未配置')
@@ -40,6 +52,7 @@ class DBManager:
         self._async_engine = create_async_engine(config.ASYNC_SQLALCHEMY_DATABASE_URI, pool_recycle=3600)
         self._session_factory = sessionmaker(bind=None, autocommit=False, autoflush=False, query_cls=BaseQuery)
         self._async_session_factory = sessionmaker(bind=self._async_engine, class_=AsyncSession, expire_on_commit=False)
+        event.listen(self._session_factory, 'after_begin', ping_listener)
 
     def auto(self, request: Request):
         """
@@ -110,6 +123,8 @@ class DBManager:
         if not hasattr(self._local, "session"):
             self._session_factory.configure(bind=self.engine)
             self._local.session = scoped_session(self._session_factory, scopefunc=lambda: id(self._local))
+        # ping
+
         return self._local.session()
 
     @property
