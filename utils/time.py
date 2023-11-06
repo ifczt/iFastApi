@@ -25,14 +25,23 @@ class Time:
     def time_zone(self, value):
         self._time_zone = pytz.timezone(value)
 
+    def transform_datetime(self, date):
+        """
+        将日期字符串转换为日期对象
+        :param date: str 日期字符串
+        :return datetime.datetime
+        """
+        if isinstance(date, str):
+            date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").date()
+        elif isinstance(date, int):
+            date = datetime.datetime.fromtimestamp(date, self.time_zone)
+        return date
+
     def get_start_end_timestamp(self, date, timezone=None):
         # 创建时区对象
         tz = pytz.timezone(timezone) if timezone else self.time_zone
         # 将日期字符串转换为日期对象
-        if isinstance(date, str):
-            date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
-        elif isinstance(date, int):
-            date = datetime.datetime.fromtimestamp(date, tz)
+        date = self.transform_datetime(date)
 
         # 获取当天最开始的时间戳
         start_dt = tz.localize(datetime.datetime.combine(date, datetime.time.min))
@@ -70,6 +79,8 @@ class Time:
         """
         if not default_datetime:
             default_datetime = self.now
+        elif not isinstance(default_datetime, datetime.datetime):
+            default_datetime = self.transform_datetime(default_datetime)
         return default_datetime.strftime(time_format)
 
     def get_time_start(self, default_datetime: datetime.datetime = None):
