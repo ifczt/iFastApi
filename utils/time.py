@@ -70,6 +70,14 @@ class Time:
         """
         return self.now + datetime.timedelta(days=n)
 
+    def get_time_before_days(self, n):
+        """
+        获取 N 天前的时间
+        :param n: int 天数
+        :return datetime.datetime
+        """
+        return self.now - datetime.timedelta(days=n)
+
     def format_time(self, default_datetime: datetime.datetime = None, time_format="%Y-%m-%d %H:%M:%S"):
         """
         获取格式化时间 默认时间为当前时间
