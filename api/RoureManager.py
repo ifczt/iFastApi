@@ -8,14 +8,27 @@ class RouteManager:
     def __init__(self):
         # 无需使用DB的路由集合
         self.use_db_route = set()
+        # 权限验证集合
         self.auth = {}
+        # 需要token验证的路由集合
         self.need_token = set()
+        # 规则验证集合
+        self.rules = {}
 
     def add_auth(self, route, power):
         if isinstance(power, bool) and power:
             self.need_token.add(route)
             return
         self.auth[route] = power
+
+    def add_rule(self, route, rules: list):
+        self.rules[route] = rules
+
+    def check_rule(self, route, authority: list):
+        if route not in self.rules:
+            return True
+        # 只要存在交集就返回True
+        return len(set(self.rules[route]) & set(authority)) > 0
 
     def check_auth(self, route, power):
         if route not in self.auth:

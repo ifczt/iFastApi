@@ -5,7 +5,7 @@ from collections import UserDict
 
 class RouteInfo(UserDict):
     def __init__(self, path, endpoint, methods=None, dependencies=None, summary=None, use_db=True, verify_auth=None,
-                 need_captcha=True):
+                 need_captcha=True, use_role=None):
         """
         :param path: 访问路径
         :param endpoint: 执行函数
@@ -26,4 +26,6 @@ class RouteInfo(UserDict):
             'summary': summary,
             'use_db': use_db,
             'verify_auth': verify_auth,
+            'need_captcha': need_captcha,
+            'use_role': use_role
         }

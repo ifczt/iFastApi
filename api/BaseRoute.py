@@ -69,6 +69,8 @@ class BaseRoute:
                 self.roure_manager.add_use_db_route(path_key)
             if route_info.get('verify_auth'):
                 self.roure_manager.add_auth(path_key, route_info.get('verify_auth'))
+            if route_info.get('use_role'):
+                self.roure_manager.add_rule(path_key, route_info.get('use_role'))
 
             # 使用字典推导式和 filter 函数获取目标函数的参数信息
             func_params = inspect.signature(self.router.add_api_route).parameters
