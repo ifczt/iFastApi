@@ -22,13 +22,14 @@ class RouteManager:
         self.auth[route] = power
 
     def add_rule(self, route, rules: list):
-        self.rules[route] = rules
+        if rules:
+            self.rules[route] = rules
 
     def check_rule(self, route, authority: list):
         if route not in self.rules:
             return True
         # 只要存在交集就返回True
-        return len(set(self.rules[route]) & set(authority)) > 0
+        return len(set(self.rules[route]) & set(authority or [])) > 0
 
     def check_auth(self, route, power):
         if route not in self.auth:

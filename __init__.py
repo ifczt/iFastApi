@@ -54,6 +54,11 @@ class IFastAPI:
 
         self.setup()
 
+    # 增加依赖
+    def add_depend(self, depend):
+        print(self.app.dependency_overrides)
+        self.app.dependency_overrides[depend] = Depends(depend)
+        print(self.app.dependency_overrides)
     @staticmethod
     @app.exception_handler(Error)
     async def unicorn_exception_handler(request: Request, exc: Error):
