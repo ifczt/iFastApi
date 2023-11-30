@@ -14,7 +14,7 @@ class HTTPStatus:
     BAD_REQUEST = 400  # 请求报文存在语法错误或者参数错误，服务器无法理解
     UNAUTHORIZED = 401  # 请求需要用户验证
     FORBIDDEN = 403  # 请求被服务器拒绝，一般是权限不足
-    FORBIDDEN_ENDPOINT = 403.1  # 没有访问该接口的权限
+    INVALID_TOKEN = 403.1  # 无效TOKEN
     NOT_FOUND = 404  # 请求的资源不存在
     METHOD_NOT_ALLOWED = 405  # 请求方法不被允许
     NOT_ACCEPTABLE = 406  # 请求格式不可得

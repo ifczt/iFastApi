@@ -38,11 +38,11 @@ class JWTBearer(HTTPBearer):
         credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
-                raise Error(status_code=HTTPStatus.FORBIDDEN, message="无效的身份验证方案。")
+                raise Error(status_code=HTTPStatus.INVALID_TOKEN, message="无效的身份验证方案。")
             account_info = JWTBearer.verify_jwt(credentials.credentials)
             identity = account_info.get(g.config.POWER_KEY)
             if not account_info:
-                raise Error(status_code=HTTPStatus.FORBIDDEN, message="无效令牌或过期令牌。")
+                raise Error(status_code=HTTPStatus.INVALID_TOKEN, message="无效令牌或过期令牌。")
             if not self.roure_manager.check_auth(path_to_key(request.url.path), identity):
                 raise Error(status_code=HTTPStatus.FORBIDDEN, message="权限不足，拒绝继续访问")
             if g.config.GOD_IDENTITY and g.config.GOD_IDENTITY != identity:
