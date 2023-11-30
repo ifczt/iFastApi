@@ -46,7 +46,7 @@ class JWTBearer(HTTPBearer):
             if not self.roure_manager.check_auth(path_to_key(request.url.path), identity):
                 raise Error(status_code=HTTPStatus.FORBIDDEN, message="权限不足，拒绝继续访问")
             if g.config.GOD_IDENTITY and g.config.GOD_IDENTITY != identity:
-                if not self.roure_manager.check_rule(path_to_key(request.url.path), identity):
+                if not self.roure_manager.check_rule(path_to_key(request.url.path), account_info.get('authority')):
                     raise Error(status_code=HTTPStatus.FORBIDDEN, message="没有访问该接口的权限")
             g.u_id = account_info.get('u_id', account_info.get('id'))
             g.identity = account_info.get('identity')
