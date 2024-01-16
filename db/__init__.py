@@ -49,8 +49,8 @@ class DBManager:
 
         self._engine = create_engine(config.SQLALCHEMY_DATABASE_URI, pool_recycle=3600, pool_pre_ping=True)
         self._async_engine = create_async_engine(config.ASYNC_SQLALCHEMY_DATABASE_URI, pool_recycle=3600, pool_pre_ping=True)
-        self._session_factory = sessionmaker(bind=None, autocommit=False, autoflush=False, query_cls=BaseQuery)
-        self._async_session_factory = sessionmaker(bind=self._async_engine, class_=AsyncSession, expire_on_commit=False)
+        self._session_factory = sessionmaker(bind=None, autocommit=True, autoflush=True, query_cls=BaseQuery)
+        self._async_session_factory = sessionmaker(bind=self._async_engine, class_=AsyncSession, expire_on_commit=False, autocommit=True)
         event.listen(self._session_factory, 'after_begin', ping_listener)
 
     def auto(self, request: Request):
